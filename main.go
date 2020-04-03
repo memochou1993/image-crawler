@@ -7,41 +7,63 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/memochou1993/image-crawler/helper"
 	"golang.org/x/net/html"
 )
 
 const (
-	concurrency = 10
+	concurrency = 3
+)
+
+var (
+	links    = []string{}
+	hosts    = make(map[string]bool)
+	linkChan = make(chan string)
+	nodeChan = make(chan *html.Node)
 )
 
 func main() {
-	links := []string{"https://www.google.com/"}
+	links = []string{
+		"https://www.google.com/?1",
+		"https://www.google.com/?2",
+		"https://www.google.com/?3",
+		"https://www.google.com/?4",
+	}
 
-	linkChan := make(chan string)
-	nodeChan := make(chan *html.Node)
-
-	go func() {
-		for _, link := range links {
-			linkChan <- link
-		}
-	}()
+	go sendLinks()
 
 	for i := 0; i < concurrency; i++ {
-		go func() {
-			for link := range linkChan {
-				nodes := fetch(link)
-
-				for _, node := range nodes {
-					go func(node *html.Node) {
-						nodeChan <- node
-					}(node)
-				}
-			}
-		}()
+		go sendNodes()
 	}
 
 	for node := range nodeChan {
 		fmt.Println(node)
+	}
+}
+
+func sendLinks() {
+	for _, link := range links {
+		host := helper.GetHost(link)
+
+		if !hosts[host] {
+			hosts[host] = true
+		} else {
+			time.Sleep(1 * time.Second)
+		}
+
+		linkChan <- link
+	}
+}
+
+func sendNodes() {
+	for link := range linkChan {
+		nodes := fetch(link)
+
+		for _, node := range nodes {
+			go func(node *html.Node) {
+				nodeChan <- node
+			}(node)
+		}
 	}
 }
 
