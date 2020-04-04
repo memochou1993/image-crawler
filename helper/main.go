@@ -5,12 +5,19 @@ import (
 	"net/url"
 )
 
-func GetHost(link string) string {
-	u, err := url.Parse(link)
+// ResolveReference func
+func ResolveReference(link string, reference string) string {
+	u, err := url.Parse(reference)
 
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 	}
 
-	return u.Hostname()
+	base, err := url.Parse(link)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return base.ResolveReference(u).String()
 }

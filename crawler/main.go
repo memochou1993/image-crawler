@@ -7,18 +7,29 @@ import (
 	"sync"
 	"time"
 
+	"github.com/memochou1993/image-crawler/helper"
 	"golang.org/x/net/html"
 )
 
-// Initialize func
-func Initialize(links []string) {
+// Collection struct
+type Collection struct {
+	Images []Image
+}
+
+// Image struct
+type Image struct {
+	Link string
+	Node *html.Node
+}
+
+// Fetch func
+func (c *Collection) Fetch(links []string) {
 	throttle := make(chan struct{}, 10)
 	terminal := make(chan struct{}, 0)
 	linkGroup := sync.WaitGroup{}
 	nodeGroup := sync.WaitGroup{}
 
-	nodeChan := make(chan *html.Node)
-	nodes := []*html.Node{}
+	nodeChan := make(chan Image)
 
 	linkGroup.Add(len(links))
 
@@ -32,7 +43,10 @@ func Initialize(links []string) {
 
 			for _, node := range nodes {
 				go func(node *html.Node) {
-					nodeChan <- node
+					nodeChan <- Image{
+						Link: link,
+						Node: node,
+					}
 
 					nodeGroup.Done()
 				}(node)
@@ -55,15 +69,32 @@ func Initialize(links []string) {
 Loop:
 	for {
 		select {
-		case node := <-nodeChan:
-			log.Println("received node")
-			nodes = append(nodes, node)
+		case image := <-nodeChan:
+			log.Println("received image")
+			c.Images = append(c.Images, image)
 		case <-terminal:
 			break Loop
 		}
 	}
 
-	log.Println("received all nodes", nodes)
+	log.Println("received all images", c.Images)
+}
+
+// Format func
+func (c *Collection) Format() []string {
+	images := []string{}
+
+	for _, image := range c.Images {
+		for _, a := range image.Node.Attr {
+			if a.Key == "src" {
+				images = append(images, helper.ResolveReference(image.Link, a.Val))
+			}
+		}
+	}
+
+	log.Println("formatted all images", c.Images)
+
+	return images
 }
 
 func fetch(url string) []*html.Node {
