@@ -2,63 +2,68 @@ package crawler
 
 import (
 	"crypto/tls"
-	"fmt"
 	"log"
 	"net/http"
+	"sync"
 	"time"
 
-	"github.com/memochou1993/image-crawler/helper"
 	"golang.org/x/net/html"
-)
-
-const (
-	concurrency = 3
-)
-
-var (
-	linkChan = make(chan string)
-	nodeChan = make(chan *html.Node)
 )
 
 // Initialize func
 func Initialize(links []string) {
-	go sendLinks(links)
+	throttle := make(chan struct{}, 10)
+	terminal := make(chan struct{}, 0)
+	linkGroup := sync.WaitGroup{}
+	nodeGroup := sync.WaitGroup{}
 
-	for i := 0; i < concurrency; i++ {
-		go sendNodes()
-	}
+	nodeChan := make(chan *html.Node)
+	nodes := []*html.Node{}
 
-	for node := range nodeChan {
-		fmt.Println(node)
-	}
-}
-
-func sendLinks(links []string) {
-	hosts := make(map[string]bool)
+	linkGroup.Add(len(links))
 
 	for _, link := range links {
-		host := helper.GetHost(link)
+		throttle <- struct{}{}
 
-		if !hosts[host] {
-			hosts[host] = true
-		} else {
-			time.Sleep(1 * time.Second)
-		}
+		go func(link string) {
+			nodes := fetch(link)
 
-		linkChan <- link
+			nodeGroup.Add(len(nodes))
+
+			for _, node := range nodes {
+				go func(node *html.Node) {
+					nodeChan <- node
+
+					nodeGroup.Done()
+				}(node)
+
+				log.Println("sent node")
+			}
+
+			<-throttle
+
+			linkGroup.Done()
+		}(link)
 	}
-}
 
-func sendNodes() {
-	for link := range linkChan {
-		nodes := fetch(link)
+	go func() {
+		linkGroup.Wait()
+		nodeGroup.Wait()
+		close(terminal)
+	}()
 
-		for _, node := range nodes {
-			go func(node *html.Node) {
-				nodeChan <- node
-			}(node)
+Loop:
+	for {
+		select {
+		case node := <-nodeChan:
+			log.Println("received node")
+			nodes = append(nodes, node)
+		case <-terminal:
+			break Loop
 		}
 	}
+
+	log.Println("received all nodes", nodes)
 }
 
 func fetch(url string) []*html.Node {
