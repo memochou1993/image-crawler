@@ -1,15 +1,14 @@
 package main
 
-import "github.com/memochou1993/image-crawler/crawler"
+import (
+	"log"
+	"net/http"
+
+	"github.com/memochou1993/image-crawler/controller"
+)
 
 func main() {
-	links := []string{
-		"https://www.104.com.tw/jobs/main/",
-		"https://www.google.com/?1",
-		"https://www.google.com/?2",
-		"https://www.google.com/?3",
-		"https://www.google.com/?4",
-	}
+	http.HandleFunc("/", controller.Handler)
 
-	crawler.Initialize(links)
+	log.Fatal(http.ListenAndServe(":8084", nil))
 }
