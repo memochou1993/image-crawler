@@ -26,11 +26,13 @@ type Image struct {
 
 // Query func
 func (g *Gallery) Query(r *http.Request, key string) {
-	g.Links = strings.Split(strings.Replace(r.URL.Query().Get(key), " ", "", -1), ",")
+	if query := r.URL.Query().Get(key); query != "" {
+		g.Links = strings.Split(strings.Replace(query, " ", "", -1), ",")
+	}
 }
 
 // Fetch func
-func (g *Gallery) Fetch() []string {
+func (g *Gallery) Fetch() {
 	nodeChan := make(chan Image)
 
 	throttle := make(chan struct{}, 10)
@@ -80,8 +82,6 @@ Loop:
 			break Loop
 		}
 	}
-
-	return g.Format()
 }
 
 // Format func

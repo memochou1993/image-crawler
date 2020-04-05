@@ -2,14 +2,20 @@ package controller
 
 import (
 	"encoding/json"
+	"html/template"
 	"net/http"
 
 	"github.com/memochou1993/image-crawler/crawler"
 	"github.com/memochou1993/image-crawler/formatter"
 )
 
-// Handler func
-func Handler(w http.ResponseWriter, r *http.Request) {
+// Index func
+func Index(w http.ResponseWriter, r *http.Request) {
+	render(w)
+}
+
+// Handle func
+func Handle(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	gallery := crawler.Gallery{}
@@ -30,6 +36,11 @@ func response(w http.ResponseWriter, code int, payload interface{}) {
 
 	if err := json.NewEncoder(w).Encode(payload); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
 	}
+}
+
+func render(w http.ResponseWriter) {
+	var tmpl = template.Must(template.ParseFiles("views/index.html"))
+
+	tmpl.Execute(w, nil)
 }
