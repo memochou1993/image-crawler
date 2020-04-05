@@ -11,7 +11,7 @@ import (
 
 // Index func
 func Index(w http.ResponseWriter, r *http.Request) {
-	render(w)
+	render(w, "index")
 }
 
 // Handle func
@@ -39,8 +39,8 @@ func response(w http.ResponseWriter, code int, payload interface{}) {
 	}
 }
 
-func render(w http.ResponseWriter) {
-	var tmpl = template.Must(template.ParseFiles("views/index.html"))
+func render(w http.ResponseWriter, name string) {
+	var tmpl = template.Must(template.ParseFiles("public/" + name + ".html"))
 
 	tmpl.Execute(w, nil)
 }
