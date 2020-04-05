@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"log"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -11,8 +12,9 @@ import (
 	"golang.org/x/net/html"
 )
 
-// Collection struct
-type Collection struct {
+// Gallery struct
+type Gallery struct {
+	Links  []string
 	Images []Image
 }
 
@@ -22,18 +24,23 @@ type Image struct {
 	Node *html.Node
 }
 
+// Query func
+func (g *Gallery) Query(r *http.Request, key string) {
+	g.Links = strings.Split(strings.Replace(r.URL.Query().Get(key), " ", "", -1), ",")
+}
+
 // Fetch func
-func (c *Collection) Fetch(links []string) []string {
+func (g *Gallery) Fetch() []string {
+	nodeChan := make(chan Image)
+
 	throttle := make(chan struct{}, 10)
 	terminal := make(chan struct{}, 0)
 	linkGroup := sync.WaitGroup{}
 	nodeGroup := sync.WaitGroup{}
 
-	nodeChan := make(chan Image)
+	linkGroup.Add(len(g.Links))
 
-	linkGroup.Add(len(links))
-
-	for _, link := range links {
+	for _, link := range g.Links {
 		throttle <- struct{}{}
 
 		go func(link string) {
@@ -50,8 +57,6 @@ func (c *Collection) Fetch(links []string) []string {
 
 					nodeGroup.Done()
 				}(node)
-
-				log.Println("sent node")
 			}
 
 			<-throttle
@@ -70,20 +75,20 @@ Loop:
 	for {
 		select {
 		case image := <-nodeChan:
-			log.Println("received image")
-			c.Images = append(c.Images, image)
+			g.Images = append(g.Images, image)
 		case <-terminal:
 			break Loop
 		}
 	}
 
-	return c.format()
+	return g.Format()
 }
 
-func (c *Collection) format() []string {
+// Format func
+func (g *Gallery) Format() []string {
 	images := []string{}
 
-	for _, image := range c.Images {
+	for _, image := range g.Images {
 		for _, a := range image.Node.Attr {
 			if a.Key == "src" && a.Val != "" {
 				images = append(images, helper.ResolveReference(image.Link, a.Val))

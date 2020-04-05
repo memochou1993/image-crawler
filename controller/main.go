@@ -3,7 +3,6 @@ package controller
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 
 	"github.com/memochou1993/image-crawler/crawler"
 	"github.com/memochou1993/image-crawler/formatter"
@@ -13,12 +12,12 @@ import (
 func Handler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
-	collection := crawler.Collection{}
-	links := strings.Split(strings.Replace(r.URL.Query().Get("links"), " ", "", -1), ",")
-	images := collection.Fetch(links)
+	gallery := crawler.Gallery{}
+	gallery.Query(r, "links")
+	gallery.Fetch()
 
 	payload := formatter.Payload{}
-	payload.Set(&images)
+	payload.Set(gallery.Format())
 
 	response(w, http.StatusOK, payload)
 }
