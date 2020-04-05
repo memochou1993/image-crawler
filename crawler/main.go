@@ -23,7 +23,7 @@ type Image struct {
 }
 
 // Fetch func
-func (c *Collection) Fetch(links []string) {
+func (c *Collection) Fetch(links []string) []string {
 	throttle := make(chan struct{}, 10)
 	terminal := make(chan struct{}, 0)
 	linkGroup := sync.WaitGroup{}
@@ -77,22 +77,19 @@ Loop:
 		}
 	}
 
-	log.Println("received all images", c.Images)
+	return c.format()
 }
 
-// Format func
-func (c *Collection) Format() []string {
+func (c *Collection) format() []string {
 	images := []string{}
 
 	for _, image := range c.Images {
 		for _, a := range image.Node.Attr {
-			if a.Key == "src" {
+			if a.Key == "src" && a.Val != "" {
 				images = append(images, helper.ResolveReference(image.Link, a.Val))
 			}
 		}
 	}
-
-	log.Println("formatted all images", c.Images)
 
 	return images
 }

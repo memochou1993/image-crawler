@@ -1,47 +1,36 @@
 package controller
 
 import (
-	"fmt"
+	"encoding/json"
 	"net/http"
-	"text/template"
+	"strings"
 
 	"github.com/memochou1993/image-crawler/crawler"
+	"github.com/memochou1993/image-crawler/formatter"
 )
 
 // Handler func
 func Handler(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
 	collection := crawler.Collection{}
+	links := strings.Split(strings.Replace(r.URL.Query().Get("links"), " ", "", -1), ",")
+	images := collection.Fetch(links)
 
-	links := []string{
-		"https://risu.io/",
-		"https://www.104.com.tw/jobs/main/",
-		"https://www.google.com/?1",
-		// "https://www.google.com/?2",
-		// "https://www.google.com/?3",
-		// "https://www.google.com/?4",
-		// "https://www.google.com/?5",
-		// "https://www.google.com/?6",
-		// "https://www.google.com/?7",
-		// "https://www.google.com/?8",
-		// "https://www.google.com/?9",
-		// "https://www.google.com/?10",
-	}
+	payload := formatter.Payload{}
+	payload.Set(&images)
 
-	collection.Fetch(links)
-
-	images := collection.Format()
-
-	fmt.Println("images", images)
-
-	renderTemplate(w)
+	response(w, http.StatusOK, payload)
 }
 
-func renderTemplate(w http.ResponseWriter) {
-	var tmpl = template.Must(template.ParseFiles("views/index.html"))
+func response(w http.ResponseWriter, code int, payload interface{}) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
 
-	tmpl.Execute(w, struct {
-		Langs []string
-	}{
-		[]string{"Python", "Ruby", "PHP", "Java", "Golang"},
-	})
+	if err := json.NewEncoder(w).Encode(payload); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
