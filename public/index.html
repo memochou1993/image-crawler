@@ -26,7 +26,7 @@
               md6
             >
               <v-card
-                height="564"
+                height="544"
                 class="deep-purple lighten-5 my-5"
               >
                 <v-card-text
@@ -60,7 +60,7 @@
                     </v-text-field>
                   </v-form>
                   <v-card
-                    height="360"
+                    height="340"
                     outlined
                     class="overflow-auto deep-purple lighten-5"
                   >
@@ -113,7 +113,6 @@
                     class="text-center py-4"
                   >
                     <v-btn
-                      v-if="!previewed"
                       :disabled="loading"
                       color="indigo"
                       class="white--text"
@@ -122,8 +121,8 @@
                       Preview
                     </v-btn>
                     <v-btn
-                      v-else
-                      :disabled="loading"
+                      v-if="previewed"
+                      :disabled="loading || images.length === 0"
                       color="indigo"
                       class="white--text"
                       @click="download()"
@@ -144,9 +143,11 @@
                   >
                     <v-progress-circular
                       v-if="loading"
-                      :size="50"
+                      :size="40"
+                      :width="3"
                       color="indigo"
                       indeterminate
+                      class="my-5"
                     />
                   </div>
                   <v-carousel
@@ -220,23 +221,31 @@
         deleteLink(link) {
           this.setLinks(this.links.filter((item) => item !== link));
         },
+        scrollToBottom() {
+          window.scrollTo({
+            top: document.body.scrollHeight,
+            behavior: 'smooth'
+          });
+        },
         preview() {
           if (!this.links.length) {
             return;
           }
+          this.setImages([]);
           this.setLoading(true);
           fetch(this.endpoint)
             .then((response) => {
               return response.json(); 
             })
             .then(({ data }) => {
-              this.setImages(data);
               this.setPreviewed(true);
+              this.setImages(data);
             })
             .catch((err) => {
               console.error(err);
             })
             .finally(() => {
+              this.scrollToBottom();
               this.setLoading(false);
             });
         },
