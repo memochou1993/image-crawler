@@ -26,7 +26,7 @@
               md6
             >
               <v-card
-                height="500"
+                height="560"
                 class="deep-purple lighten-5"
               >
                 <v-card-text
@@ -37,6 +37,28 @@
                   >
                     Image Crawler
                   </div>
+                  <v-form
+                    @submit.prevent="addLink()"
+                    class="mb-4"
+                  >
+                    <v-text-field
+                      v-model="link"
+                      :rules="[]"
+                      autofocus
+                      autocomplete="off"
+                      color="purple darken-2"
+                      hide-details
+                      label="http://"
+                      solo
+                    >
+                      <v-icon
+                        slot="append"
+                        @click="addLink()"
+                      >
+                        mdi-plus-circle-outline
+                      </v-icon>
+                    </v-text-field>
+                  </v-form>
                   <v-card
                     height="400"
                     outlined
@@ -45,52 +67,46 @@
                     <v-card-text
                       class="py-0"
                     >
-                      <v-form
-                        @submit.prevent="addLink()"
-                        class="mb-4"
-                      >
-                        <v-text-field
-                          v-model="link"
-                          :rules="[]"
-                          autofocus
-                          autocomplete="off"
-                          color="purple darken-2"
-                          hide-details
-                          label="http://"
-                          solo
-                        >
-                          <v-icon
-                            slot="append"
-                            @click="addLink()"
-                          >
-                            mdi-plus-circle-outline
-                          </v-icon>
-                        </v-text-field>
-                      </v-form>
                       <div
                         v-for="(link, index) in links"
                         :key="index"
                         class="my-2"
                       >
-                        <v-btn
-                          color="blue darken-2"
-                          fab
-                          icon
-                          small
-                          @click="deleteLink(link)"
+                        <v-layout
+                          align-center
                         >
-                          <v-icon>
-                            mdi-minus-circle-outline
-                          </v-icon>
-                        </v-btn>
-                        <v-chip
-                          color="blue darken-2"
-                          label
-                          outlined
-                        >
-                          {{ link }}
-                        </v-chip>
-                      </div>
+                          <v-flex
+                            md1
+                          >
+                            <v-btn
+                              color="indigo lighten-1"
+                              fab
+                              icon
+                              small
+                              @click="deleteLink(link)"
+                            >
+                              <v-icon>
+                                mdi-minus-circle-outline
+                              </v-icon>
+                            </v-btn>
+                          </v-flex>
+                          <v-flex
+                            md10
+                          >
+                            <v-chip
+                              color="indigo lighten-1"
+                              label
+                              outlined
+                            >
+                              <span
+                                class="text-truncate"
+                              >
+                                {{ link }}
+                              </span>
+                            </v-chip>
+                          </div>
+                        </v-flex>
+                      </v-layout>
                     </v-card-text>
                   </v-card>
                 </v-card-text>
