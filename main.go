@@ -8,7 +8,6 @@ import (
 )
 
 func main() {
-	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("public/assets"))))
 	http.HandleFunc("/", controller.Index)
 	http.HandleFunc("/api", controller.Handle)
 
