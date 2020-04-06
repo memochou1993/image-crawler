@@ -1,14 +1,140 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Crawler</title>
-    <link href="assets/css/tailwind.min.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+  <title>Image Crawler</title>
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="bg-yellow-500">
-        Image Crawler
-    </div>
+  <div
+    id="app"
+  >
+    <v-app>
+      <v-content
+        class="deep-purple lighten-3"
+      >
+        <v-container
+          fill-height
+        >
+          <v-layout
+            align-center
+            justify-center
+          >
+            <v-flex
+              md6
+            >
+              <v-card
+                height="500"
+                class="deep-purple lighten-5"
+              >
+                <v-card-text
+                  class="py-0"
+                >
+                  <div
+                    class="display-1 font-weight-light text-center py-4"
+                  >
+                    Image Crawler
+                  </div>
+                  <v-card
+                    height="400"
+                    outlined
+                    class="overflow-auto deep-purple lighten-5"
+                  >
+                    <v-card-text
+                      class="py-0"
+                    >
+                      <v-form
+                        @submit.prevent="addLink()"
+                        class="mb-4"
+                      >
+                        <v-text-field
+                          v-model="link"
+                          :rules="[]"
+                          autofocus
+                          autocomplete="off"
+                          color="purple darken-2"
+                          hide-details
+                          label="http://"
+                          solo
+                        >
+                          <v-icon
+                            slot="append"
+                            @click="addLink()"
+                          >
+                            mdi-plus-circle-outline
+                          </v-icon>
+                        </v-text-field>
+                      </v-form>
+                      <div
+                        v-for="(link, index) in links"
+                        :key="index"
+                        class="my-2"
+                      >
+                        <v-btn
+                          color="blue darken-2"
+                          fab
+                          icon
+                          small
+                          @click="deleteLink(link)"
+                        >
+                          <v-icon>
+                            mdi-minus-circle-outline
+                          </v-icon>
+                        </v-btn>
+                        <v-chip
+                          color="blue darken-2"
+                          label
+                          outlined
+                        >
+                          {{ link }}
+                        </v-chip>
+                      </div>
+                    </v-card-text>
+                  </v-card>
+                </v-card-text>
+              </v-card>
+            </v-flex>
+          </v-layout>
+        </v-container>
+      </v-content>
+    </v-app>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+  <script>
+    new Vue({
+      el: '#app',
+      vuetify: new Vuetify(),
+      data: {
+        link: '',
+        links: [],
+      },
+      methods: {
+        setLink(link) {
+          this.link = link;
+        },
+        setLinks(links) {
+          this.links = links;
+        },
+        addLink() {
+          if (!this.link) {
+            return;
+          }
+          if (this.links.includes(this.link)) {
+            this.setLink('');
+            return;
+          }
+          this.setLinks([this.link, ...this.links]);
+          this.setLink('');
+        },
+        deleteLink(link) {
+          this.setLinks(this.links.filter((item) => item !== link));
+        },
+      },
+    });
+  </script>
 </body>
 </html>
