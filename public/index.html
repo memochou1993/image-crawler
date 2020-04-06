@@ -27,7 +27,7 @@
             >
               <v-card
                 height="564"
-                class="deep-purple lighten-5"
+                class="deep-purple lighten-5 my-5"
               >
                 <v-card-text
                   class="py-0"
@@ -101,7 +101,7 @@
                               <span
                                 class="text-truncate"
                               >
-                                {{ link }}
+                                ${ link }
                               </span>
                             </v-chip>
                           </v-flex>
@@ -113,12 +113,53 @@
                     class="text-center py-4"
                   >
                     <v-btn
+                      v-if="!previewed"
+                      :disabled="loading"
                       color="indigo"
                       class="white--text"
+                      @click="preview()"
+                    >
+                      Preview
+                    </v-btn>
+                    <v-btn
+                      v-else
+                      :disabled="loading"
+                      color="indigo"
+                      class="white--text"
+                      @click="download()"
                     >
                       Download
                     </v-btn>
                   </div>
+                </v-card-text>
+              </v-card>
+              <v-card
+                class="elevation-0 transparent my-5"
+              >
+                <v-card-text
+                  class="pa-0"
+                >
+                  <div
+                    class="text-center"
+                  >
+                    <v-progress-circular
+                      v-if="loading"
+                      :size="50"
+                      color="indigo"
+                      indeterminate
+                    />
+                  </div>
+                  <v-carousel
+                    v-if="images.length > 0"
+                    hide-delimiters
+                    class="elevation-2"
+                  >
+                    <v-carousel-item
+                      v-for="(image, index) in images"
+                      :key="index"
+                      :src="image"
+                    />
+                  </v-carousel>
                 </v-card-text>
               </v-card>
             </v-flex>
@@ -133,12 +174,32 @@
   <script>
     new Vue({
       el: '#app',
+      delimiters: ['${', '}'],
       vuetify: new Vuetify(),
       data: {
+        previewed: false,
+        loading: false,
+        images: [],
         link: '',
-        links: [],
+        links: [
+          //
+        ],
+      },
+      computed: {
+        endpoint() {
+          return `/api?links=${this.links.join(',')}`;
+        },
       },
       methods: {
+        setPreviewed(previewed) {
+          this.previewed = previewed;
+        },
+        setLoading(loading) {
+          this.loading = loading;
+        },
+        setImages(images) {
+          this.images = images;
+        },
         setLink(link) {
           this.link = link;
         },
@@ -158,6 +219,29 @@
         },
         deleteLink(link) {
           this.setLinks(this.links.filter((item) => item !== link));
+        },
+        preview() {
+          if (!this.links.length) {
+            return;
+          }
+          this.setLoading(true);
+          fetch(this.endpoint)
+            .then((response) => {
+              return response.json(); 
+            })
+            .then(({ data }) => {
+              this.setImages(data);
+              this.setPreviewed(true);
+            })
+            .catch((err) => {
+              console.error(err);
+            })
+            .finally(() => {
+              this.setLoading(false);
+            });
+        },
+        download() {
+          //
         },
       },
     });
