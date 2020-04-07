@@ -136,7 +136,13 @@ func collect(links []string) map[string][]byte {
 
 	for _, link := range links {
 		go func(link string) {
-			resp := fetch(link)
+			resp, err := fetch(link)
+
+			if err != nil {
+				log.Println(err)
+				return
+			}
+
 			defer resp.Body.Close()
 
 			image, err := ioutil.ReadAll(resp.Body)
@@ -156,7 +162,7 @@ func collect(links []string) map[string][]byte {
 	return files
 }
 
-func fetch(url string) *http.Response {
+func fetch(url string) (*http.Response, error) {
 	client := &http.Client{
 		Timeout: time.Duration(30 * time.Second),
 		Transport: &http.Transport{
@@ -169,22 +175,26 @@ func fetch(url string) *http.Response {
 	req, err := http.NewRequest("GET", url, nil)
 
 	if err != nil {
-		log.Println(err)
-		return nil
+		return nil, err
 	}
 
 	resp, err := client.Do(req)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+func parse(url string) []*html.Node {
+	resp, err := fetch(url)
 
 	if err != nil {
 		log.Println(err)
 		return nil
 	}
 
-	return resp
-}
-
-func parse(url string) []*html.Node {
-	resp := fetch(url)
 	defer resp.Body.Close()
 
 	node, err := html.Parse(resp.Body)
