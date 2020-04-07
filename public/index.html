@@ -6,6 +6,7 @@
   <title>Image Crawler</title>
   <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  <link href="/assets/css/app.css" rel="stylesheet">
 </head>
 <body>
   <div
@@ -24,6 +25,7 @@
           >
             <v-flex
               md6
+              sm8
             >
               <v-card
                 height="544"
@@ -78,6 +80,7 @@
                         >
                           <v-flex
                             md1
+                            sm2
                           >
                             <v-btn
                               color="indigo lighten-1"
@@ -93,6 +96,7 @@
                           </v-flex>
                           <v-flex
                             md10
+                            sm9
                           >
                             <v-chip
                               color="indigo lighten-1"
@@ -114,6 +118,7 @@
                     class="text-center py-4"
                   >
                     <v-btn
+                      v-if="!previewed"
                       :disabled="loading || (!this.link && !links.length)"
                       color="indigo"
                       class="white--text"
@@ -122,7 +127,7 @@
                       Preview
                     </v-btn>
                     <v-btn
-                      v-if="previewed"
+                      v-else
                       :disabled="loading || !images.length"
                       color="indigo"
                       class="white--text"
@@ -149,7 +154,8 @@
                       :src="image"
                       reverse-transition="fade-transition"
                       transition="fade-transition"
-                    />
+                    >
+                    </v-carousel-item>
                   </v-carousel>
                 </v-card-text>
               </v-card>
@@ -162,101 +168,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
-  <script>
-    new Vue({
-      el: '#app',
-      delimiters: ['${', '}'],
-      vuetify: new Vuetify(),
-      data: {
-        previewed: false,
-        loading: false,
-        images: [],
-        link: '',
-        links: [],
-      },
-      computed: {
-        endpoint() {
-          return `/api?links=${this.links.join(',')}`;
-        },
-      },
-      methods: {
-        setPreviewed(previewed) {
-          this.previewed = previewed;
-        },
-        setLoading(loading) {
-          this.loading = loading;
-        },
-        setImages(images) {
-          this.images = images;
-        },
-        setLink(link) {
-          this.link = link;
-        },
-        setLinks(links) {
-          this.links = links;
-        },
-        addLink() {
-          if (!this.link) {
-            return;
-          }
-          if (this.links.includes(this.link)) {
-            this.setLink('');
-            return;
-          }
-          this.setLinks([this.link, ...this.links]);
-          this.setLink('');
-        },
-        deleteLink(link) {
-          this.setLinks(this.links.filter((item) => item !== link));
-        },
-        scrollToBottom() {
-          window.scrollTo({
-            top: document.body.scrollHeight,
-            behavior: 'smooth'
-          });
-        },
-        refresh() {
-          this.setPreviewed(false);
-          this.setLoading(false);
-          this.setImages([]);
-          this.setLink('');
-          this.setLinks([]);
-        },
-        preview() {
-          if (this.link) {
-            this.addLink();
-          }
-          if (!this.links.length) {
-            return;
-          }
-          this.setImages([]);
-          this.setLoading(true);
-          fetch(this.endpoint)
-            .then((response) => {
-              return response.json(); 
-            })
-            .then(({ data }) => {
-              this.setPreviewed(true);
-              this.setImages(data);
-            })
-            .catch((err) => {
-              console.error(err);
-            })
-            .finally(() => {
-              this.scrollToBottom();
-              this.setLoading(false);
-            });
-        },
-        download() {
-          //
-        },
-      },
-    });
-  </script>
-  <style>
-    .pointer {
-      cursor: pointer;
-    }
-  </style>
+  <script src="/assets/js/jszip.min.js"></script>
+  <script src="/assets/js/app.js"></script>
 </body>
 </html>
