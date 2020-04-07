@@ -7,7 +7,7 @@ new Vue({
     loading: false,
     images: [],
     link: '',
-    links: ["https://www.google.com/doodles?hl=zh-TW"],
+    links: [],
   },
   computed: {
     query() {

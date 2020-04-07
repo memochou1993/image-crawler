@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
   <title>Image Crawler</title>
+  <link href="/assets/icon/favicon.png" rel="shortcut icon" type="image/png">
   <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
   <link href="/assets/css/app.css" rel="stylesheet">
@@ -22,14 +23,16 @@
           <v-layout
             align-center
             justify-center
+            row
+            wrap
           >
             <v-flex
               md6
-              sm8
+              xs12
             >
               <v-card
                 height="544"
-                class="deep-purple lighten-5 my-5"
+                class="deep-purple lighten-5 ma-5"
               >
                 <v-card-text
                   class="py-0"
@@ -119,7 +122,8 @@
                   >
                     <v-btn
                       v-if="!previewed"
-                      :disabled="loading || (!this.link && !links.length)"
+                      :disabled="!this.link && !links.length"
+                      :loading="loading"
                       color="indigo"
                       class="white--text"
                       @click="preview()"
@@ -128,7 +132,8 @@
                     </v-btn>
                     <v-btn
                       v-else
-                      :disabled="loading || !images.length"
+                      :disabled="!images.length"
+                      :loading="loading"
                       color="indigo"
                       class="white--text"
                       @click="download()"
@@ -138,14 +143,20 @@
                   </div>
                 </v-card-text>
               </v-card>
+            </v-flex>
+            <v-flex
+              md6
+              xs12
+            >
               <v-card
-                v-if="!!images.length"
-                class="deep-purple lighten-5 my-5"
+                height="544"
+                class="deep-purple lighten-5 ma-5"
               >
                 <v-card-text
                   class="pa-1"
                 >
                   <v-carousel
+                    v-if="!!images.length"
                     hide-delimiters
                   >
                     <v-carousel-item
@@ -157,6 +168,57 @@
                     >
                     </v-carousel-item>
                   </v-carousel>
+                  <div
+                    v-else
+                  >
+                    <v-sheet
+                      v-if="loading"
+                      height="536"
+                      class="transparent"
+                    >
+                      <v-container
+                        fill-height
+                      >
+                        <v-layout
+                          align-center
+                          justify-center
+                        >
+                          <v-flex>
+                            <v-skeleton-loader
+                              type="image,image"
+                            />
+                          </v-flex>
+                        </v-layout>
+                      </v-container>
+                    </v-sheet>
+                    <v-card
+                      v-else
+                      height="536"
+                      class="elevation-0 transparent"
+                    >
+                      <v-container
+                        fill-height
+                      >
+                        <v-layout
+                          align-center
+                          justify-center
+                        >
+                          <v-flex
+                            class="text-center"
+                          >
+                            Powered by
+                            <a
+                              href="https://github.com/memochou1993"
+                              rel="noopener noreferrer nofollow"
+                              target="_blank"
+                            >
+                              Memo Chou
+                            </a>
+                          </v-flex>
+                        </v-layout>
+                      </v-container>
+                    </v-card>
+                  </div>
                 </v-card-text>
               </v-card>
             </v-flex>
