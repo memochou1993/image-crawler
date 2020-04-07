@@ -134,32 +134,21 @@
                 </v-card-text>
               </v-card>
               <v-card
-                class="elevation-0 transparent my-5"
+                v-if="!!images.length"
+                class="deep-purple lighten-5 my-5"
               >
                 <v-card-text
-                  class="pa-0"
+                  class="pa-1"
                 >
-                  <div
-                    class="text-center"
-                  >
-                    <v-progress-circular
-                      v-if="loading"
-                      :size="40"
-                      :width="3"
-                      color="indigo"
-                      indeterminate
-                      class="my-5"
-                    />
-                  </div>
                   <v-carousel
-                    v-if="!!images.length"
                     hide-delimiters
-                    class="elevation-2"
                   >
                     <v-carousel-item
                       v-for="(image, index) in images"
                       :key="index"
                       :src="image"
+                      reverse-transition="fade-transition"
+                      transition="fade-transition"
                     />
                   </v-carousel>
                 </v-card-text>
