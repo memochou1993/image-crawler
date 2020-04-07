@@ -2,11 +2,11 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"net/http"
 
 	"github.com/memochou1993/image-crawler/crawler"
-	"github.com/memochou1993/image-crawler/formatter"
 )
 
 // Index func
@@ -14,18 +14,32 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	render(w, "index")
 }
 
-// Handle func
-func Handle(w http.ResponseWriter, r *http.Request) {
+// Preview func
+func Preview(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	gallery := crawler.Gallery{}
-	gallery.Query(r, "links")
+	gallery.Query(r.URL.Query().Get("links"))
 	gallery.Fetch()
 
-	payload := formatter.Payload{}
-	payload.Set(gallery.Format())
+	response(w, http.StatusOK, gallery.Format())
+}
 
-	response(w, http.StatusOK, payload)
+// Download func
+func Download(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
+	gallery := crawler.Gallery{}
+	gallery.Query(r.URL.Query().Get("links"))
+	gallery.Fetch()
+
+	download(w, "images", gallery.Compress())
+}
+
+func render(w http.ResponseWriter, name string) {
+	var tmpl = template.Must(template.ParseFiles("public/" + name + ".html"))
+
+	tmpl.Execute(w, nil)
 }
 
 func response(w http.ResponseWriter, code int, payload interface{}) {
@@ -38,8 +52,8 @@ func response(w http.ResponseWriter, code int, payload interface{}) {
 	}
 }
 
-func render(w http.ResponseWriter, name string) {
-	var tmpl = template.Must(template.ParseFiles("public/" + name + ".html"))
-
-	tmpl.Execute(w, nil)
+func download(w http.ResponseWriter, filename string, payload []byte) {
+	w.Header().Set("Content-Type", "application/zip")
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s.zip\"", filename))
+	w.Write(payload)
 }

@@ -10,8 +10,8 @@ new Vue({
     links: ["https://www.google.com/doodles?hl=zh-TW"],
   },
   computed: {
-    endpoint() {
-      return `/api?links=${this.links.join(',')}`;
+    query() {
+      return `links=${this.links.join(',')}`;
     },
   },
   watch: {
@@ -73,19 +73,14 @@ new Vue({
       this.setLinks([]);
     },
     preview() {
-      if (this.link) {
-        this.addLink();
-      }
-      if (!this.links.length) {
-        return;
-      }
+      this.addLink();
       this.setImages([]);
       this.setLoading(true);
-      fetch(this.endpoint)
+      fetch(`/api/preview?${this.query}`)
         .then((response) => {
           return response.json();
         })
-        .then(({ data }) => {
+        .then((data) => {
           this.setPreviewed(true);
           this.setImages(data);
         })
@@ -98,7 +93,28 @@ new Vue({
         });
     },
     download() {
-      //
+      this.setLoading(true);
+      fetch(`/api/download?${this.query}`)
+        .then((response) => {
+          return response.blob();
+        })
+        .then((data) => {
+          console.log(data)
+          const url = window.URL.createObjectURL(data);
+          const link = document.createElement('a');
+          link.setAttribute('href', url);
+          link.setAttribute('download', 'images.zip');
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+        })
+        .catch((err) => {
+          console.error(err);
+        })
+        .finally(() => {
+          this.setLoading(false);
+        });
     },
   },
 });

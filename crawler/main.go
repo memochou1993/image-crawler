@@ -1,9 +1,13 @@
 package crawler
 
 import (
+	"archive/zip"
+	"bytes"
 	"crypto/tls"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -25,8 +29,8 @@ type Image struct {
 }
 
 // Query func
-func (g *Gallery) Query(r *http.Request, key string) {
-	if query := r.URL.Query().Get(key); query != "" {
+func (g *Gallery) Query(query string) {
+	if query != "" {
 		g.Links = strings.Split(strings.Replace(query, " ", "", -1), ",")
 	}
 }
@@ -34,7 +38,6 @@ func (g *Gallery) Query(r *http.Request, key string) {
 // Fetch func
 func (g *Gallery) Fetch() {
 	nodeChan := make(chan Image)
-
 	throttle := make(chan struct{}, 10)
 	terminal := make(chan struct{}, 0)
 	linkGroup := sync.WaitGroup{}
@@ -46,7 +49,7 @@ func (g *Gallery) Fetch() {
 		throttle <- struct{}{}
 
 		go func(link string) {
-			nodes := fetch(link)
+			nodes := parse(link)
 
 			nodeGroup.Add(len(nodes))
 
@@ -84,6 +87,32 @@ Loop:
 	}
 }
 
+// Compress func
+func (g *Gallery) Compress() []byte {
+	buffer := new(bytes.Buffer)
+	writer := zip.NewWriter(buffer)
+
+	images := collect(g.Format())
+
+	for name, image := range images {
+		file, err := writer.Create(name)
+
+		if err != nil {
+			log.Println(err)
+		}
+
+		if _, err = file.Write(image); err != nil {
+			log.Println(err)
+		}
+	}
+
+	if err := writer.Close(); err != nil {
+		log.Println(err)
+	}
+
+	return buffer.Bytes()
+}
+
 // Format func
 func (g *Gallery) Format() []string {
 	images := []string{}
@@ -99,9 +128,37 @@ func (g *Gallery) Format() []string {
 	return images
 }
 
-func fetch(url string) []*html.Node {
+func collect(links []string) map[string][]byte {
+	files := make(map[string][]byte, len(links))
+	fileGroup := sync.WaitGroup{}
+
+	fileGroup.Add(len(links))
+
+	for _, link := range links {
+		go func(link string) {
+			resp := fetch(link)
+			defer resp.Body.Close()
+
+			image, err := ioutil.ReadAll(resp.Body)
+
+			if err != nil {
+				log.Println(err)
+			}
+
+			files[filepath.Base(link)] = image
+
+			fileGroup.Done()
+		}(link)
+	}
+
+	fileGroup.Wait()
+
+	return files
+}
+
+func fetch(url string) *http.Response {
 	client := &http.Client{
-		Timeout: time.Duration(10 * time.Second),
+		Timeout: time.Duration(30 * time.Second),
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: true,
@@ -123,6 +180,11 @@ func fetch(url string) []*html.Node {
 		return nil
 	}
 
+	return resp
+}
+
+func parse(url string) []*html.Node {
+	resp := fetch(url)
 	defer resp.Body.Close()
 
 	node, err := html.Parse(resp.Body)
