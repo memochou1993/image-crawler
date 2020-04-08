@@ -62,7 +62,7 @@ new Vue({
     scrollToBottom() {
       window.scrollTo({
         top: document.body.scrollHeight,
-        behavior: 'smooth'
+        behavior: 'smooth',
       });
     },
     refresh() {
@@ -99,7 +99,6 @@ new Vue({
           return response.blob();
         })
         .then((data) => {
-          console.log(data)
           const url = window.URL.createObjectURL(data);
           const link = document.createElement('a');
           link.setAttribute('href', url);
