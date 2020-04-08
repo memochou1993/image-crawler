@@ -130,6 +130,7 @@ func (g *Gallery) Format() []string {
 
 func collect(links []string) map[string][]byte {
 	files := make(map[string][]byte, len(links))
+	mutex := sync.Mutex{}
 	fileGroup := sync.WaitGroup{}
 
 	fileGroup.Add(len(links))
@@ -151,7 +152,9 @@ func collect(links []string) map[string][]byte {
 				log.Println(err)
 			}
 
+			mutex.Lock()
 			files[filepath.Base(link)] = image
+			mutex.Unlock()
 
 			fileGroup.Done()
 		}(link)
@@ -163,6 +166,8 @@ func collect(links []string) map[string][]byte {
 }
 
 func fetch(url string) (*http.Response, error) {
+	method := "GET"
+
 	client := &http.Client{
 		Timeout: time.Duration(30 * time.Second),
 		Transport: &http.Transport{
@@ -172,7 +177,7 @@ func fetch(url string) (*http.Response, error) {
 		},
 	}
 
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest(method, url, nil)
 
 	if err != nil {
 		return nil, err
@@ -184,7 +189,7 @@ func fetch(url string) (*http.Response, error) {
 		return nil, err
 	}
 
-	log.Println("URL fetched:", url)
+	log.Println(method, url)
 
 	return resp, nil
 }
