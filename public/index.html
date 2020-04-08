@@ -204,6 +204,21 @@
             </v-flex>
           </v-layout>
         </v-container>
+        <v-snackbar
+          v-model="snackbar"
+          :timeout="2500"
+        >
+          ${ message }
+          <v-btn
+            color="red lighten-1"
+            icon
+            @click="setSnackbar(false)"
+          >
+            <v-icon>
+              mdi-close
+            </v-icon>
+          </v-btn>
+        </v-snackbar>
       </v-content>
     </v-app>
   </div>

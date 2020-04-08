@@ -3,6 +3,8 @@ new Vue({
   delimiters: ['${', '}'],
   vuetify: new Vuetify(),
   data: {
+    message: '',
+    snackbar: false,
     previewed: false,
     loading: false,
     images: [],
@@ -30,6 +32,12 @@ new Vue({
     },
   },
   methods: {
+    setMessage(message) {
+      this.message = message;
+    },
+    setSnackbar(snackbar) {
+      this.snackbar = snackbar;
+    },
     setPreviewed(previewed) {
       this.previewed = previewed;
     },
@@ -72,6 +80,15 @@ new Vue({
       this.setLink('');
       this.setLinks([]);
     },
+    alert() {
+      return (err) => {
+        const message = err.name === 'AbortError'
+          ? 'Request Timeout'
+          : 'Network Error';
+        this.setMessage(message);
+        this.setSnackbar(true);
+      };
+    },
     preview() {
       this.addLink();
       this.setImages([]);
@@ -80,16 +97,12 @@ new Vue({
         action: 'preview',
         timeout: 10,
       })
-        .then((response) => {
-          return response.json();
-        })
+        .then((response) => response.json())
         .then((data) => {
           this.setImages(data);
           this.setPreviewed(true);
         })
-        .catch((err) => {
-          console.warn(err);
-        })
+        .catch(this.alert())
         .finally(() => {
           this.scrollToBottom();
           this.setLoading(false);
@@ -101,9 +114,7 @@ new Vue({
         action: 'download',
         timeout: 30,
       })
-        .then((response) => {
-          return response.blob();
-        })
+        .then((response) => response.blob())
         .then((data) => {
           const url = window.URL.createObjectURL(data);
           const link = document.createElement('a');
@@ -114,9 +125,7 @@ new Vue({
           document.body.removeChild(link);
           window.URL.revokeObjectURL(url);
         })
-        .catch((err) => {
-          console.warn(err);
-        })
+        .catch(this.alert())
         .finally(() => {
           this.setLoading(false);
         });
