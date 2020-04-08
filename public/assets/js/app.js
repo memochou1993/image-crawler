@@ -76,16 +76,19 @@ new Vue({
       this.addLink();
       this.setImages([]);
       this.setLoading(true);
-      fetch(`/api/preview?${this.query}`)
+      this.do({
+        action: 'preview',
+        timeout: 10,
+      })
         .then((response) => {
           return response.json();
         })
         .then((data) => {
-          this.setPreviewed(true);
           this.setImages(data);
+          this.setPreviewed(true);
         })
         .catch((err) => {
-          console.error(err);
+          console.warn(err);
         })
         .finally(() => {
           this.scrollToBottom();
@@ -94,7 +97,10 @@ new Vue({
     },
     download() {
       this.setLoading(true);
-      fetch(`/api/download?${this.query}`)
+      this.do({
+        action: 'download',
+        timeout: 30,
+      })
         .then((response) => {
           return response.blob();
         })
@@ -109,11 +115,20 @@ new Vue({
           window.URL.revokeObjectURL(url);
         })
         .catch((err) => {
-          console.error(err);
+          console.warn(err);
         })
         .finally(() => {
           this.setLoading(false);
         });
+    },
+    do({
+      action,
+      timeout = 5000,
+    }) {
+      const controller = new AbortController();
+      const { signal } = controller;
+      setTimeout(() => controller.abort(), timeout * 1000);
+      return fetch(`/api/${action}?${this.query}`, { signal });
     },
     validate(link = "") {
       if (link) {
