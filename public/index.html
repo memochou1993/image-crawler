@@ -152,74 +152,54 @@
                 height="544"
                 class="deep-purple lighten-5 ma-5"
               >
-                <v-card-text
-                  class="pa-1"
+                <v-container
+                  fill-height
                 >
-                  <v-carousel
-                    v-if="!!images.length"
-                    hide-delimiters
+                  <v-layout
+                    align-center
+                    justify-center
                   >
-                    <v-carousel-item
-                      v-for="(image, index) in images"
-                      :key="index"
-                      :src="image"
-                      reverse-transition="fade-transition"
-                      transition="fade-transition"
-                    >
-                    </v-carousel-item>
-                  </v-carousel>
-                  <div
-                    v-else
-                  >
-                    <v-sheet
-                      v-if="loading"
-                      height="536"
-                      class="transparent"
-                    >
-                      <v-container
-                        fill-height
+                    <v-flex>
+                      <v-carousel
+                        v-if="!!images.length"
+                        hide-delimiters
                       >
-                        <v-layout
-                          align-center
-                          justify-center
+                        <v-carousel-item
+                          v-for="(image, index) in images"
+                          :key="index"
+                          :src="image"
+                          reverse-transition="fade-transition"
+                          transition="fade-transition"
                         >
-                          <v-flex>
-                            <v-skeleton-loader
-                              type="image,image"
-                            />
-                          </v-flex>
-                        </v-layout>
-                      </v-container>
-                    </v-sheet>
-                    <v-card
-                      v-else
-                      height="536"
-                      class="elevation-0 transparent"
-                    >
-                      <v-container
-                        fill-height
+                        </v-carousel-item>
+                      </v-carousel>
+                      <div
+                        v-else
                       >
-                        <v-layout
-                          align-center
-                          justify-center
+                        <div
+                          v-if="loading"
                         >
-                          <v-flex
-                            class="text-center"
+                          <v-skeleton-loader
+                            type="image,image"
+                          />
+                        </div>
+                        <div
+                          v-else
+                          class="text-center"
+                        >
+                          Powered by
+                          <a
+                            href="https://github.com/memochou1993"
+                            rel="noopener noreferrer nofollow"
+                            target="_blank"
                           >
-                            Powered by
-                            <a
-                              href="https://github.com/memochou1993"
-                              rel="noopener noreferrer nofollow"
-                              target="_blank"
-                            >
-                              Memo Chou
-                            </a>
-                          </v-flex>
-                        </v-layout>
-                      </v-container>
-                    </v-card>
-                  </div>
-                </v-card-text>
+                            Memo Chou
+                          </a>
+                        </div>
+                      </div>
+                    </v-flex>
+                  </v-layout>
+                </v-container>
               </v-card>
             </v-flex>
           </v-layout>
