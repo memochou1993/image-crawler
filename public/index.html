@@ -9,7 +9,9 @@
   <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
   <link href="/assets/css/app.css" rel="stylesheet">
 </head>
-<body>
+<body
+  hidden
+>
   <div
     id="app"
   >
@@ -17,193 +19,198 @@
       <v-content
         class="deep-purple lighten-3"
       >
-        <v-container
-          fill-height
+        <transition
+          name="fade"
         >
-          <v-layout
-            align-center
-            justify-center
-            row
-            wrap
+          <v-container
+            v-show="loaded"
+            fill-height
           >
-            <v-flex
-              md6
-              xs12
+            <v-layout
+              align-center
+              justify-center
+              row
+              wrap
             >
-              <v-card
-                height="544"
-                class="deep-purple lighten-5 ma-5"
+              <v-flex
+                md6
+                xs12
               >
-                <v-card-text
-                  class="py-0"
+                <v-card
+                  height="544"
+                  class="deep-purple lighten-5 ma-5"
                 >
-                  <div
-                    class="display-1 font-weight-light text-center py-4 pointer"
-                    @click="refresh()"
+                  <v-card-text
+                    class="py-0"
                   >
-                    Image Crawler
-                  </div>
-                  <v-form
-                    @submit.prevent="addLink()"
-                    class="mb-4"
-                  >
-                    <v-text-field
-                      v-model="link"
-                      autofocus
-                      autocomplete="off"
-                      color="purple darken-2"
-                      hide-details
-                      label="http://"
-                      solo
+                    <div
+                      class="display-1 font-weight-light text-center py-4 pointer"
+                      @click="refresh()"
                     >
-                      <v-icon
-                        slot="append"
-                        @click="addLink()"
-                      >
-                        mdi-plus-circle-outline
-                      </v-icon>
-                    </v-text-field>
-                  </v-form>
-                  <v-card
-                    height="340"
-                    outlined
-                    class="overflow-auto deep-purple lighten-5"
-                  >
-                    <v-card-text
-                      class="py-0"
+                      Image Crawler
+                    </div>
+                    <v-form
+                      @submit.prevent="addLink()"
+                      class="mb-4"
                     >
-                      <div
-                        v-for="(link, index) in links"
-                        :key="index"
-                        class="my-2"
+                      <v-text-field
+                        v-model="link"
+                        autofocus
+                        autocomplete="off"
+                        color="purple darken-2"
+                        hide-details
+                        label="http://"
+                        solo
                       >
-                        <v-layout
-                          align-center
+                        <v-icon
+                          slot="append"
+                          @click="addLink()"
                         >
-                          <v-flex
-                            md1
-                            xs2
-                          >
-                            <v-btn
-                              :color="`${validate(link) ? 'indigo lighten-1' : 'red'}`"
-                              fab
-                              icon
-                              small
-                              @click="deleteLink(link)"
-                            >
-                              <v-icon>
-                                mdi-minus-circle-outline
-                              </v-icon>
-                            </v-btn>
-                          </v-flex>
-                          <v-flex
-                            md10
-                            xs9
-                          >
-                            <v-chip
-                              :color="`${validate(link) ? 'indigo lighten-1' : 'red'}`"
-                              label
-                              outlined
-                              class="mx-2"
-                            >
-                              <span
-                                class="text-truncate"
-                              >
-                                ${ link }
-                              </span>
-                            </v-chip>
-                          </v-flex>
-                        </v-layout>
-                      </div>
-                    </v-card-text>
-                  </v-card>
-                  <div
-                    class="text-center py-4"
-                  >
-                    <v-btn
-                      v-if="!previewed"
-                      :disabled="(!this.link && !links.length) || (this.link && !validate(this.link)) || !validate()"
-                      :loading="loading"
-                      color="indigo"
-                      class="white--text"
-                      @click="preview()"
+                          mdi-plus-circle-outline
+                        </v-icon>
+                      </v-text-field>
+                    </v-form>
+                    <v-card
+                      height="340"
+                      outlined
+                      class="overflow-auto deep-purple lighten-5"
                     >
-                      Preview
-                    </v-btn>
-                    <v-btn
-                      v-else
-                      :disabled="!images.length"
-                      :loading="loading"
-                      color="indigo"
-                      class="white--text"
-                      @click="download()"
-                    >
-                      Download
-                    </v-btn>
-                  </div>
-                </v-card-text>
-              </v-card>
-            </v-flex>
-            <v-flex
-              md6
-              xs12
-            >
-              <v-card
-                height="544"
-                class="deep-purple lighten-5 ma-5"
-              >
-                <v-container
-                  fill-height
-                >
-                  <v-layout
-                    align-center
-                    justify-center
-                  >
-                    <v-flex>
-                      <v-carousel
-                        v-if="!!images.length"
-                        hide-delimiters
-                      >
-                        <v-carousel-item
-                          v-for="(image, index) in images"
-                          :key="index"
-                          :src="image"
-                          reverse-transition="fade-transition"
-                          transition="fade-transition"
-                        >
-                        </v-carousel-item>
-                      </v-carousel>
-                      <div
-                        v-else
+                      <v-card-text
+                        class="py-0"
                       >
                         <div
-                          v-if="loading"
+                          v-for="(link, index) in links"
+                          :key="index"
+                          class="my-2"
                         >
-                          <v-skeleton-loader
-                            type="image,image"
-                          />
+                          <v-layout
+                            align-center
+                          >
+                            <v-flex
+                              md1
+                              xs2
+                            >
+                              <v-btn
+                                :color="`${validate(link) ? 'indigo lighten-1' : 'red'}`"
+                                fab
+                                icon
+                                small
+                                @click="deleteLink(link)"
+                              >
+                                <v-icon>
+                                  mdi-minus-circle-outline
+                                </v-icon>
+                              </v-btn>
+                            </v-flex>
+                            <v-flex
+                              md10
+                              xs9
+                            >
+                              <v-chip
+                                :color="`${validate(link) ? 'indigo lighten-1' : 'red'}`"
+                                label
+                                outlined
+                                class="mx-2"
+                              >
+                                <span
+                                  class="text-truncate"
+                                >
+                                  ${ link }
+                                </span>
+                              </v-chip>
+                            </v-flex>
+                          </v-layout>
                         </div>
+                      </v-card-text>
+                    </v-card>
+                    <div
+                      class="text-center py-4"
+                    >
+                      <v-btn
+                        v-if="!previewed"
+                        :disabled="(!this.link && !links.length) || (this.link && !validate(this.link)) || !validate()"
+                        :loading="loading"
+                        color="indigo"
+                        class="white--text"
+                        @click="preview()"
+                      >
+                        Preview
+                      </v-btn>
+                      <v-btn
+                        v-else
+                        :disabled="!images.length"
+                        :loading="loading"
+                        color="indigo"
+                        class="white--text"
+                        @click="download()"
+                      >
+                        Download
+                      </v-btn>
+                    </div>
+                  </v-card-text>
+                </v-card>
+              </v-flex>
+              <v-flex
+                md6
+                xs12
+              >
+                <v-card
+                  height="544"
+                  class="deep-purple lighten-5 ma-5"
+                >
+                  <v-container
+                    fill-height
+                  >
+                    <v-layout
+                      align-center
+                      justify-center
+                    >
+                      <v-flex>
+                        <v-carousel
+                          v-if="!!images.length"
+                          hide-delimiters
+                        >
+                          <v-carousel-item
+                            v-for="(image, index) in images"
+                            :key="index"
+                            :src="image"
+                            reverse-transition="fade-transition"
+                            transition="fade-transition"
+                          >
+                          </v-carousel-item>
+                        </v-carousel>
                         <div
                           v-else
-                          class="text-center"
                         >
-                          Powered by
-                          <a
-                            href="https://github.com/memochou1993"
-                            rel="noopener noreferrer nofollow"
-                            target="_blank"
+                          <div
+                            v-if="loading"
                           >
-                            Memo Chou
-                          </a>
+                            <v-skeleton-loader
+                              type="image,image"
+                            />
+                          </div>
+                          <div
+                            v-else
+                            class="text-center"
+                          >
+                            Powered by
+                            <a
+                              href="https://github.com/memochou1993"
+                              rel="noopener noreferrer nofollow"
+                              target="_blank"
+                            >
+                              Memo Chou
+                            </a>
+                          </div>
                         </div>
-                      </div>
-                    </v-flex>
-                  </v-layout>
-                </v-container>
-              </v-card>
-            </v-flex>
-          </v-layout>
-        </v-container>
+                      </v-flex>
+                    </v-layout>
+                  </v-container>
+                </v-card>
+              </v-flex>
+            </v-layout>
+          </v-container>
+        </transition>
         <v-snackbar
           v-model="snackbar"
           :timeout="2500"

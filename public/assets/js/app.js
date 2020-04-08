@@ -7,6 +7,7 @@ new Vue({
     snackbar: false,
     previewed: false,
     loading: false,
+    loaded: false,
     images: [],
     link: '',
     links: [],
@@ -31,6 +32,10 @@ new Vue({
       }
     },
   },
+  mounted() {
+    document.body.removeAttribute('hidden');
+    this.setLoaded(true);
+  },
   methods: {
     setMessage(message) {
       this.message = message;
@@ -43,6 +48,9 @@ new Vue({
     },
     setLoading(loading) {
       this.loading = loading;
+    },
+    setLoaded(loaded) {
+      this.loaded = loaded;
     },
     setImages(images) {
       this.images = images;

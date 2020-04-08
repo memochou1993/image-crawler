@@ -1,3 +1,15 @@
+html {
+  background-color: #B39DDB;
+}
+
 .pointer {
   cursor: pointer;
+}
+
+.fade-enter {
+  opacity: 0.5;
+}
+
+.fade-enter-active {
+  transition: opacity 0.5s;
 }
