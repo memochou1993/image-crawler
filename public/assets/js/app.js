@@ -46,7 +46,7 @@ new Vue({
       this.links = links;
     },
     addLink() {
-      if (!this.link) {
+      if (!this.link.trim()) {
         return;
       }
       if (this.links.includes(this.link)) {
@@ -114,6 +114,17 @@ new Vue({
         .finally(() => {
           this.setLoading(false);
         });
+    },
+    validate(link = "") {
+      if (link) {
+        try {
+          const { protocol } = new URL(link);
+          return protocol === "http:" || protocol === "https:";
+        } catch {
+          return false;
+        }
+      }
+      return this.links.every((link) => this.validate(link));
     },
   },
 });

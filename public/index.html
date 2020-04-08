@@ -85,7 +85,7 @@
                             xs2
                           >
                             <v-btn
-                              color="indigo lighten-1"
+                              :color="`${validate(link) ? 'indigo lighten-1' : 'red'}`"
                               fab
                               icon
                               small
@@ -101,7 +101,7 @@
                             xs9
                           >
                             <v-chip
-                              color="indigo lighten-1"
+                              :color="`${validate(link) ? 'indigo lighten-1' : 'red'}`"
                               label
                               outlined
                               class="mx-2"
@@ -122,7 +122,7 @@
                   >
                     <v-btn
                       v-if="!previewed"
-                      :disabled="!this.link && !links.length"
+                      :disabled="(!this.link && !links.length) || (this.link && !validate(this.link)) || !validate()"
                       :loading="loading"
                       color="indigo"
                       class="white--text"
