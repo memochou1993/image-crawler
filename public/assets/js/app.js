@@ -88,14 +88,9 @@ new Vue({
       this.setLink('');
       this.setLinks([]);
     },
-    alert() {
-      return (err) => {
-        const message = err.name === 'AbortError'
-          ? 'Request Timeout'
-          : 'Network Error';
-        this.setMessage(message);
-        this.setSnackbar(true);
-      };
+    alert(message) {
+      this.setMessage(message);
+      this.setSnackbar(true);
     },
     preview() {
       this.addLink();
@@ -109,8 +104,13 @@ new Vue({
         .then((data) => {
           this.setImages(data);
           this.setPreviewed(true);
+          if (data.length === 0) {
+            this.alert('Not Found');
+          }
         })
-        .catch(this.alert())
+        .catch((err) => {
+          this.alert(err.name === 'AbortError' ? 'Request Timeout' : 'Network Error');
+        })
         .finally(() => {
           this.scrollToBottom();
           this.setLoading(false);
@@ -133,7 +133,9 @@ new Vue({
           document.body.removeChild(link);
           window.URL.revokeObjectURL(url);
         })
-        .catch(this.alert())
+        .catch((err) => {
+          this.alert(err.name === 'AbortError' ? 'Request Timeout' : 'Network Error');
+        })
         .finally(() => {
           this.setLoading(false);
         });
