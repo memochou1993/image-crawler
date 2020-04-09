@@ -173,7 +173,7 @@ func collect(links []string) map[string][]byte {
 			}
 
 			mutex.Lock()
-			files[filepath.Base(link)] = image
+			files[helper.Hostname(link)+"/"+filepath.Base(link)] = image
 			mutex.Unlock()
 
 			fileGroup.Done()
