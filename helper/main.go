@@ -6,6 +6,17 @@ import (
 	"strings"
 )
 
+// Scheme func
+func Scheme(link string) string {
+	u, err := url.Parse(strings.TrimSpace(link))
+
+	if err != nil {
+		log.Println(err)
+	}
+
+	return u.Scheme
+}
+
 // Hostname func
 func Hostname(link string) string {
 	u, err := url.Parse(strings.TrimSpace(link))

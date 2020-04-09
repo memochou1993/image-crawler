@@ -135,17 +135,21 @@ func (g *Gallery) Compress() []byte {
 
 // Format func
 func (g *Gallery) Format() []string {
-	images := []string{}
+	links := []string{}
 
 	for _, image := range g.Images {
 		for _, a := range image.Node.Attr {
 			if a.Key == "src" && a.Val != "" {
-				images = append(images, helper.ResolveReference(image.Link, a.Val))
+				link := helper.ResolveReference(image.Link, a.Val)
+
+				if helper.Scheme(link) == "http" || helper.Scheme(link) == "https" {
+					links = append(links, link)
+				}
 			}
 		}
 	}
 
-	return images
+	return links
 }
 
 func collect(links []string) map[string][]byte {
