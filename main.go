@@ -13,5 +13,5 @@ func main() {
 	http.HandleFunc("/api/download", controller.Download)
 	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("public/assets"))))
 
-	log.Fatal(http.ListenAndServe(":83", nil))
+	log.Fatal(http.ListenAndServe(":80", nil))
 }

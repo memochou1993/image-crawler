@@ -3,8 +3,9 @@ version: "3"
 services:
   app:
     container_name: image-crawler
-    build:
-      context: .
-    ports:
-      - "83:83"
+    build: .
     restart: always
+    env_file:
+      - .env
+    ports:
+      - "${APP_PORT}:80"
